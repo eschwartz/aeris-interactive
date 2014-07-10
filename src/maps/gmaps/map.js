@@ -19,12 +19,17 @@ define([
 
     this.bindMapEvents_();
 
-    // Sycn map view with map object.
+    // Sync map view with map object.
     this.listenTo(this.object_, {
-      'change:center': this.setCenter_,
-      'change:zoom': this.setZoom_
+      'change:center': this.updateCenter_,
+      'change:zoom': this.updateZoom_
     }, this);
 
+    // Make sure all attributes are in sync
+    // on init. If pre-existing google.maps.Map object was
+    // injected as our view, we need to make sure our aeris.maps.Map
+    // object is updated.
+    this.updateObjectFromView_();
 
     // A hack to prevent zoom on dblclick
     // Only if a handler is bound to the 'dblclick' event
@@ -40,6 +45,8 @@ define([
       // Hacks are fun, no?
       aeris.maps.Map.prototype.on.apply(this, arguments);
     };
+
+
   };
   _.inherits(GoogleMapStrategy, AbstractStrategy);
 
@@ -105,9 +112,9 @@ define([
 
   /**
    * @private
-   * @method setCenter_
+   * @method updateCenter_
    */
-  GoogleMapStrategy.prototype.setCenter_ = function() {
+  GoogleMapStrategy.prototype.updateCenter_ = function() {
     var latLng = mapUtil.arrayToLatLng(this.object_.get('center'));
 
     this.getView().setCenter(latLng);
@@ -115,10 +122,23 @@ define([
 
 
   /**
+   * @method updateAllAttributes_
    * @private
-   * @method setZoom_
    */
-  GoogleMapStrategy.prototype.setZoom_ = function() {
+  GoogleMapStrategy.prototype.updateObjectFromView_ = function() {
+    this.object_.set({
+      center: this.getView().getCenter(),
+      zoom: this.getView().getZoom(),
+      scrollZoom: this.getView().scrollwheel
+    });
+  };
+
+
+  /**
+   * @private
+   * @method updateZoom_
+   */
+  GoogleMapStrategy.prototype.updateZoom_ = function() {
     var zoom = this.object_.get('zoom');
     this.getView().setZoom(zoom);
   };
