@@ -177,6 +177,25 @@ define([
   };
 
 
+  MockRequire.prototype.getRequiredModuleIds = function() {
+    return this.require.
+      argsForCall.
+      reduce(function(moduleIds, requireArgs) {
+        var requiredModulesIds = requireArgs[0];
+
+        // Looking at a require('moduleName') call,
+        // so this module hasn't necessary been loaded (just referenced).
+        if (_.isString(requiredModulesIds)) {
+          return moduleIds;
+        }
+
+        requiredModulesIds.forEach(moduleIds.push, moduleIds);
+
+        return moduleIds;
+      }, []);
+  };
+
+
   /**
    * Use MockRequire in place of the global
    * `require` method.
@@ -199,8 +218,29 @@ define([
     global.define = this.defineOrig_;
   };
 
+  if (jasmine) {
+    beforeEach(function() {
+      this.addMatchers({
+        toHaveRequired: function(moduleId) {
+          var mockRequire = this.actual;
+          var actualRequiredModuleIds = mockRequire.getRequiredModuleIds();
 
-  function NOOP() {}
+          this.message = this.isNot ?
+            _.constant('Expected MockRequire not to have required ' +
+              'module "' + moduleId + '"') :
+            _.constant('Expected MockRequire to have required ' +
+              'module "' + moduleId + '". Actual required modules: ' +
+              jasmine.pp(actualRequiredModuleIds));
+
+          return _.contains(actualRequiredModuleIds, moduleId);
+        }
+      });
+    });
+  }
+
+
+  function NOOP() {
+  }
 
 
   return MockRequire;

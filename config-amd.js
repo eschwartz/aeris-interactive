@@ -38,5 +38,12 @@ require.config({
       deps: ['leaflet'],
       exports: 'L.mapbox'
     }
-  }
+  },
+  packages: [
+    {
+      name: 'when',
+      location: 'bower_components/when',
+      main: 'when'
+    }
+  ]
 });

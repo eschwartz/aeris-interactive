@@ -27,11 +27,12 @@ define([
     });
 
     it('should trigger a callback when it\'s resolved', function() {
-      promise.done(setFlag);
+      var onResolve = jasmine.createSpy('onResolve');
+      promise.done(onResolve);
 
       promise.resolve();
 
-      expect(flag).toBe(true);
+      expect(onResolve).toHaveBeenCalled();
     });
 
     it('should trigger a callback with a specified context', function() {

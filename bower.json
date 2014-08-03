@@ -23,7 +23,8 @@
     "requirejs": "~2.1.10",
     "gmaps-markerclusterer-plus": "http://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.1/src/markerclusterer.js",
     "googlemaps-amd": "~1.0.0",
-    "leaflet.markercluster": "~0.4.0"
+    "leaflet.markercluster": "~0.4.0",
+    "when": "~3.4.2"
   },
   "devDependencies": {
     "almond": "~0.2.9",
