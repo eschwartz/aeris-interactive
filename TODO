@@ -1,0 +1,9 @@
+TODO
+
+Working on appBuilder#start
+
+Parking lot
+
+- Move module to base namespace,
+  eg. aeris.interactive.maps.AnimationModule,
+  so they're easier to access

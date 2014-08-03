@@ -74,18 +74,31 @@ define([
    * @private
    */
   MockRequire.prototype.require = function(requestedModuleIds, opt_callback, opt_errback) {
+    var notFoundModules;
+    var foundModules;
     var callback = opt_callback || NOOP;
     var errback = opt_errback || NOOP;
+    var delay = this.requireDelay_;
 
-    var foundModules = this.resolveModulesById_(requestedModuleIds);
-    var notFoundModules = this.getUndefinedModuleIds_(requestedModuleIds);
+    // Using `require('moduleName')`
+    // returns the defined module
+    if (_.isString(requestedModuleIds)) {
+      var ModuleFactory = this.definedModules_[requestedModuleIds];
+      if (!ModuleFactory) {
+        throw new Error('Module "' + requestedModuleIds + '" has not yet been loaded.');
+      }
+      return ModuleFactory();
+    }
+
+    foundModules = this.resolveModulesById_(requestedModuleIds);
+    notFoundModules = this.getUndefinedModuleIds_(requestedModuleIds);
 
     if (notFoundModules.length) {
-      this.invokeErrback_(errback, notFoundModules);
+      this.invokeErrback_(errback, notFoundModules, delay);
       return;
     }
 
-    this.invokeCallback_(callback, foundModules);
+    this.invokeCallback_(callback, foundModules, delay);
   };
 
 
@@ -119,32 +132,30 @@ define([
   };
 
 
-  MockRequire.prototype.invokeCallback_ = function(callback, resolvedModules) {
-    var boundCallback = function() {
+  MockRequire.prototype.invokeCallback_ = function(callback, resolvedModules, delay) {
+    this.invokeAfterDelay_(function() {
       callback.apply(global, resolvedModules);
-    };
-
-    this.invokeAfterDelay_(boundCallback);
+    }, delay);
   };
 
 
-  MockRequire.prototype.invokeErrback_ = function(errback, missingModuleIds) {
+  MockRequire.prototype.invokeErrback_ = function(errback, missingModuleIds, delay) {
     var errorObj = {
       requireType: 'No mock modules defined',
       requireModules: missingModuleIds
     };
     errback = _.bind(errback, global, errorObj);
 
-    this.invokeAfterDelay_(errback);
+    this.invokeAfterDelay_(errback, delay);
   };
 
 
-  MockRequire.prototype.invokeAfterDelay_ = function(fn) {
-    if (_.isNull(this.requireDelay_)) {
+  MockRequire.prototype.invokeAfterDelay_ = function(fn, delay) {
+    if (_.isNull(delay)) {
       fn();
     }
     else {
-      window.setTimeout(fn, this.requireDelay_);
+      window.setTimeout(fn, delay);
     }
   };
 

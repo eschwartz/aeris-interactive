@@ -202,6 +202,21 @@ define([
 
 
   /**
+   * Resolve/reject the promise
+   * when the proxy promise is resolved/rejected.
+   *
+   * @method {aeris.Promise} proxy
+   */
+  Promise.prototype.proxy = function(proxyPromise) {
+    proxyPromise.
+      done(this.resolve).
+      fail(this.reject);
+
+    return this;
+  };
+
+
+  /**
    * Create a master promise from a combination of promises.
    * Master promise is resolved when all component promises are resolved,
    * or rejected when any single component promise is rejected.
@@ -299,6 +314,11 @@ define([
     nextAt(0);
 
     return promiseToResolveAll;
+  };
+
+
+  Promise.map = function(arr, mapFn) {
+    return Promise.when(arr.map(mapFn));
   };
 
 
